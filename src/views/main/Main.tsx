@@ -2,6 +2,7 @@ import { useReducer } from "react";
 import styled from "styled-components";
 import Header from "../../components/header";
 import VideoList from "../../components/videoList";
+import { initState } from "../../types/youtubeApiTypes";
 
 const initialState = {
   loading: true,
@@ -46,56 +47,53 @@ const initialState = {
   },
 };
 
-interface initialState {
-  loading: boolean;
-  error: string;
-  result: {
-    kind: string;
-    etag: string;
-    nextPageToken: string;
-    prevPageToken: string;
-    regionCode: string;
-    pageInfo: {
-      totalResults: number;
-      resultsPerPage: number;
-    };
-    items: videoList[];
-  };
-}
+// interface initialState {
+//   loading: boolean;
+//   error: string;
+//   result: {
+//     kind: string;
+//     etag: string;
+//     nextPageToken: string;
+//     prevPageToken: string;
+//     regionCode: string;
+//     pageInfo: {
+//       totalResults: number;
+//       resultsPerPage: number;
+//     };
+//     items: videoList[];
+//   };
+// }
 
-type videoList = {
-  kind: string;
-  etag: string;
-  id: {
-    kind: string;
-    videoId: string;
-    channelId: string;
-    playlistId: string;
-  };
-  snippet: {
-    publishedAt: Date;
-    channelId: string;
-    title: string;
-    description: string;
-    thumbnails: {
-      ["key"]: {
-        url: string;
-        width: number;
-        height: number;
-      };
-    };
-    channelTitle: string;
-    liveBroadcastContent: string;
-  };
-};
+// type videoList = {
+//   kind: string;
+//   etag: string;
+//   id: {
+//     kind: string;
+//     videoId: string;
+//     channelId: string;
+//     playlistId: string;
+//   };
+//   snippet: {
+//     publishedAt: Date;
+//     channelId: string;
+//     title: string;
+//     description: string;
+//     thumbnails: {
+//       ["key"]: {
+//         url: string;
+//         width: number;
+//         height: number;
+//       };
+//     };
+//     channelTitle: string;
+//     liveBroadcastContent: string;
+//   };
+// };
 
 const Main = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  function reducer(
-    state: initialState,
-    action: { type: string; payload: any }
-  ) {
+  function reducer(state: initState, action: { type: string; payload?: any }) {
     switch (action.type) {
       case "Initial_Fetch_Success": {
         return {
@@ -118,7 +116,7 @@ const Main = () => {
   return (
     <Wrapper>
       <Header />
-      <VideoList />
+      <VideoList state={state} dispatch={dispatch} />
     </Wrapper>
   );
 };
