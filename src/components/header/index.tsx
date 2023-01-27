@@ -1,10 +1,32 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import ytDesktopIcon from "../../assets/images/icons/header-desktop-icon.svg";
 import searchIcon from "../../assets/images/icons/search.svg";
 import ytMobileIcon from "../../assets/images/icons/youtube-mobile.jpeg";
-const Header = () => {
+
+interface IProps {
+  params: {
+    maxResults: number;
+    q: string;
+    type: string;
+  };
+  setParams: React.Dispatch<
+    React.SetStateAction<{
+      maxResults: number;
+      q: string;
+      type: string;
+    }>
+  >;
+}
+
+const Header = ({ params, setParams }: IProps) => {
   const [textCase, setTextCase] = useState(true);
+  const [mobileSearchTxt, setMobileSearchTxt] = useState("");
+  const desktopInputRef = React.useRef<HTMLInputElement>(null);
+
+  const onSearch = (val: string) => {
+    if (val) setParams(prevSate => ({ ...prevSate, q: val }));
+  };
 
   return (
     <Wrapper>
@@ -14,23 +36,36 @@ const Header = () => {
       <img src={ytMobileIcon} alt="youtube" height="40px" />
 
       <SearchWrapper>
-        <input type="text" />
-        <section>
+        <input type="text" ref={desktopInputRef} />
+        <section
+          onClick={() => onSearch(desktopInputRef?.current?.value || "")}
+        >
           <img src={searchIcon} alt="search" height="24px" />
         </section>
       </SearchWrapper>
 
       {textCase ? (
         <TextWrapper>
-          <p>Hello</p>
+          <p>{mobileSearchTxt}</p>
           <section onClick={() => setTextCase(prevState => !prevState)}>
             <img src={searchIcon} alt="search" height="24px" />
           </section>
         </TextWrapper>
       ) : (
         <MobileSearchWrapper>
-          <input type="text" />
-          <section onClick={() => setTextCase(prevState => !prevState)}>
+          <input
+            type="text"
+            value={mobileSearchTxt}
+            onChange={e => setMobileSearchTxt(e.target.value)}
+          />
+          <section
+            onClick={() => {
+              if (!textCase) {
+                onSearch(mobileSearchTxt);
+              }
+              setTextCase(prevState => !prevState);
+            }}
+          >
             <img src={searchIcon} alt="search" height="24px" />
           </section>
         </MobileSearchWrapper>
