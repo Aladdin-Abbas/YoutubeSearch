@@ -1,9 +1,53 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import filterIcon from "../../assets/images/icons/filter.png";
+import youtubeAPI from "../../apis/youtubeAPI";
+import { ApiResponse, initState } from "../../types/youtubeApiTypes";
+import { getYearDiff } from "../../utils/utils";
+interface IProps {
+  state: initState;
+  dispatch: React.Dispatch<{
+    type: string;
+    payload: any;
+  }>;
+}
 
-const VideoList = () => {
+const VideoList = ({ state, dispatch }: IProps) => {
   const [showFilter, setShowFilter] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchData = async () => {
+      try {
+        const response = await youtubeAPI.get(
+          "search?part=snippet&key=AIzaSyBMxc3zON1lj_BClfxjkOfQZISaBV-oVfU",
+          {
+            params: { maxResults: 10 },
+            signal: controller.signal,
+          }
+        );
+        const json = (await response.data) as ApiResponse;
+        console.log(json);
+        dispatch({ type: "Initial_Fetch_Success", payload: json });
+        // setData(json.Search);
+        // setRowCount(json.totalResults);
+      } catch (error) {
+        // setIsError(true);
+        console.error(error);
+        dispatch({ type: "Initial_Fetch_Error", payload: {} });
+        return;
+      }
+      //   setIsError(false);
+      //   setIsLoading(false);
+      //   setIsRefetching(false);
+    };
+
+    fetchData();
+
+    return () => controller.abort();
+  }, []);
+
   return (
     <Wrapper>
       <DesktopFilter>
@@ -74,7 +118,29 @@ const VideoList = () => {
       </MobileFilter>
       <section>
         <hr />
-        VideoList
+        {state &&
+          state?.result?.items?.length > 0 &&
+          state?.result?.items.map(el => (
+            <VideoDetailsWrapper key={el?.id?.videoId}>
+              <img
+                src={el?.snippet?.thumbnails?.medium?.url}
+                alt={el?.snippet?.title}
+              />
+              <section>
+                <h1>{el?.snippet?.title}</h1>
+                <section>
+                  <span>{el?.snippet?.channelTitle}</span>
+                  <span>
+                    {el?.snippet?.publishedAt
+                      ? getYearDiff(new Date(el?.snippet?.publishedAt)) +
+                        " years"
+                      : ""}
+                  </span>
+                </section>
+                <p>{el?.snippet?.description}</p>
+              </section>
+            </VideoDetailsWrapper>
+          ))}
       </section>
     </Wrapper>
   );
@@ -84,13 +150,20 @@ export default VideoList;
 
 const Wrapper = styled.section`
   background-color: #fafafa;
-  height: calc(100% - 56px);
-  section {
+  /* height: calc(100% - 56px); */
+  hr {
+    margin-top: 0;
+    border-top: 1px solid #f5f5f5;
+  }
+  > section {
     max-width: min(1000px, 70%);
     margin: 0 auto;
-    hr {
-      margin-top: 0;
-      border-top: 1px solid #f5f5f5;
+  }
+
+  @media (max-width: 600px) {
+    > section {
+      max-width: unset;
+      /* margin: unset; */
     }
   }
 `;
@@ -118,15 +191,22 @@ const CustomSelectWrapper = styled.div`
   width: 300px;
   /* margin-right: auto; */
   margin-bottom: 12px;
+  @media (max-width: 600px) {
+    margin: 0 auto 12px;
+  }
 `;
 
-const DesktopFilter = styled.div`
+const DesktopFilter = styled.section`
+  max-width: min(1000px, 70%);
+  margin: 0 auto;
   @media (max-width: 600px) {
     display: none;
   }
 `;
 
-const MobileFilter = styled.div`
+const MobileFilter = styled.section`
+  max-width: min(1000px, 70%);
+  margin: 0 auto;
   padding-top: 16px;
   @media (min-width: 600px) {
     display: none;
@@ -137,7 +217,6 @@ const CustomSelect = styled.section`
   width: 140px;
   select {
     appearance: none;
-    // Additional resets for further consistency
     background-color: transparent;
     border: none;
     padding: 0 1em 0 0;
@@ -190,4 +269,38 @@ const CustomSelect = styled.section`
     }
   }
   position: relative;
+`;
+
+const VideoDetailsWrapper = styled.section`
+  display: flex;
+  margin-bottom: 20px;
+  align-items: flex-start;
+  gap: 12px;
+  img {
+    flex-basis: 40%;
+  }
+  section {
+    flex-basis: 60%;
+  }
+  h1 {
+    margin: 0;
+    font-size: 18px;
+  }
+  span {
+    margin-right: 12px;
+  }
+
+  @media (max-width: 600px) {
+    width: 320px;
+    margin: 0 auto 20px;
+    img {
+      max-width: 180px;
+    }
+    section {
+      max-width: 120px;
+    }
+    p {
+      display: none;
+    }
+  }
 `;
