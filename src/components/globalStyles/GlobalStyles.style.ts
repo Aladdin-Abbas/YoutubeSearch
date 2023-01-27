@@ -3,8 +3,9 @@ import { createGlobalStyle } from "styled-components";
 export const GlobalStyles = createGlobalStyle`
 
   html {
-    font-size: calc(14px + (26 - 14) * ((100vw - 300px) / (1600 - 300)));
+    /* font-size: calc(14px + (26 - 14) * ((100vw - 300px) / (1600 - 300))); */
     box-sizing: border-box;
+    height:100%
   }
 
   *,
@@ -21,6 +22,11 @@ export const GlobalStyles = createGlobalStyle`
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    height:100%
+  }
+
+  #root{
+    height:100%
   }
 
   a {
