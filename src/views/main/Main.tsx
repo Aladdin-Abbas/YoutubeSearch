@@ -96,6 +96,7 @@ const Main = () => {
     maxResults: 10,
     q: "",
     type: "",
+    publishedAfter: null,
   });
 
   function reducer(state: initState, action: { type: string; payload?: any }) {
