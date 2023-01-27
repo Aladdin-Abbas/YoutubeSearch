@@ -3,17 +3,47 @@ import styled from "styled-components";
 import filterIcon from "../../assets/images/icons/filter.png";
 import youtubeAPI from "../../apis/youtubeAPI";
 import { ApiResponse, initState } from "../../types/youtubeApiTypes";
-import { getYearDiff } from "../../utils/utils";
+import { getYearDiff, subtractDays } from "../../utils/utils";
 interface IProps {
   state: initState;
   dispatch: React.Dispatch<{
     type: string;
     payload: any;
   }>;
+  params: {
+    maxResults: number;
+    q: string;
+    type: string;
+  };
+  setParams: React.Dispatch<
+    React.SetStateAction<{
+      maxResults: number;
+      q: string;
+      type: string;
+    }>
+  >;
 }
 
-const VideoList = ({ state, dispatch }: IProps) => {
+const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
   const [showFilter, setShowFilter] = useState(false);
+
+  //   const refetchData = async () => {
+  //     try {
+  //       const response = await youtubeAPI.get(
+  //         "search?part=snippet&key=AIzaSyBMxc3zON1lj_BClfxjkOfQZISaBV-oVfU",
+  //         {
+  //           params: { maxResults: 10 },
+  //         }
+  //       );
+  //       const json = (await response.data) as ApiResponse;
+  //       console.log(json);
+  //       dispatch({ type: "Initial_Fetch_Success", payload: json });
+  //     } catch (error) {
+  //       console.error(error);
+  //       dispatch({ type: "Initial_Fetch_Error", payload: {} });
+  //       return;
+  //     }
+  //   };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -23,30 +53,25 @@ const VideoList = ({ state, dispatch }: IProps) => {
         const response = await youtubeAPI.get(
           "search?part=snippet&key=AIzaSyBMxc3zON1lj_BClfxjkOfQZISaBV-oVfU",
           {
-            params: { maxResults: 10 },
+            // params: { maxResults: 10 },
+            params,
             signal: controller.signal,
           }
         );
         const json = (await response.data) as ApiResponse;
         console.log(json);
         dispatch({ type: "Initial_Fetch_Success", payload: json });
-        // setData(json.Search);
-        // setRowCount(json.totalResults);
       } catch (error) {
-        // setIsError(true);
         console.error(error);
         dispatch({ type: "Initial_Fetch_Error", payload: {} });
         return;
       }
-      //   setIsError(false);
-      //   setIsLoading(false);
-      //   setIsRefetching(false);
     };
 
     fetchData();
 
     return () => controller.abort();
-  }, []);
+  }, [params]);
 
   return (
     <Wrapper>
@@ -68,21 +93,20 @@ const VideoList = ({ state, dispatch }: IProps) => {
             <CustomSelectWrapper>
               <CustomSelect>
                 <select name="type" id="type">
-                  <option value="All">All</option>
-                  <option value="Video">Video</option>
-                  <option value="Channel">Channel</option>
-                  <option value="Playlist">Playlist</option>
-                  <option value="Movie">Movie</option>
+                  <option value="">All</option>
+                  <option value="video">Video</option>
+                  <option value="channel">Channel</option>
+                  <option value="playlist">Playlist</option>
                 </select>
                 <span></span>
               </CustomSelect>
               <CustomSelect>
-                <select name="uploadDate" id="uploadDate">
-                  <option value="AnyTime">Any time</option>
-                  <option value="Today">Today</option>
-                  <option value="ThisWeek">This week</option>
-                  <option value="ThisMonth">This month</option>
-                  <option value="ThisYear">This year</option>
+                <select name="publishedAfter" id="publishedAfter">
+                  <option value="">Any time</option>
+                  <option value={new Date().toISOString()}>Today</option>
+                  <option value={subtractDays(7)}>This week</option>
+                  <option value={subtractDays(30)}>This month</option>
+                  <option value={subtractDays(365)}>This year</option>
                 </select>
                 <span></span>
               </CustomSelect>
@@ -150,7 +174,6 @@ export default VideoList;
 
 const Wrapper = styled.section`
   background-color: #fafafa;
-  /* height: calc(100% - 56px); */
   hr {
     margin-top: 0;
     border-top: 1px solid #f5f5f5;
@@ -163,7 +186,6 @@ const Wrapper = styled.section`
   @media (max-width: 600px) {
     > section {
       max-width: unset;
-      /* margin: unset; */
     }
   }
 `;

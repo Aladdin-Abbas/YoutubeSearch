@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import styled from "styled-components";
 import Header from "../../components/header";
 import VideoList from "../../components/videoList";
@@ -92,6 +92,11 @@ const initialState = {
 
 const Main = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [params, setParams] = useState({
+    maxResults: 10,
+    q: "",
+    type: "",
+  });
 
   function reducer(state: initState, action: { type: string; payload?: any }) {
     switch (action.type) {
@@ -115,8 +120,13 @@ const Main = () => {
 
   return (
     <Wrapper>
-      <Header />
-      <VideoList state={state} dispatch={dispatch} />
+      <Header params={params} setParams={setParams} />
+      <VideoList
+        state={state}
+        dispatch={dispatch}
+        params={params}
+        setParams={setParams}
+      />
     </Wrapper>
   );
 };
