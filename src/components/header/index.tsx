@@ -9,12 +9,14 @@ interface IProps {
     maxResults: number;
     q: string;
     type: string;
+    publishedAfter: any;
   };
   setParams: React.Dispatch<
     React.SetStateAction<{
       maxResults: number;
       q: string;
       type: string;
+      publishedAfter: any;
     }>
   >;
 }

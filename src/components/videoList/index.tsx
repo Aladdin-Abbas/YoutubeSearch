@@ -14,12 +14,14 @@ interface IProps {
     maxResults: number;
     q: string;
     type: string;
+    publishedAfter: any;
   };
   setParams: React.Dispatch<
     React.SetStateAction<{
       maxResults: number;
       q: string;
       type: string;
+      publishedAfter: any;
     }>
   >;
 }
@@ -51,7 +53,7 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
     const fetchData = async () => {
       try {
         const response = await youtubeAPI.get(
-          "search?part=snippet&key=AIzaSyBMxc3zON1lj_BClfxjkOfQZISaBV-oVfU",
+          "search?part=snippet&key=AIzaSyC1DFeCeKrTeEEILgTtXfIzRoUi4zK2sG4",
           {
             // params: { maxResults: 10 },
             params,
@@ -92,7 +94,17 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
           <section>
             <CustomSelectWrapper>
               <CustomSelect>
-                <select name="type" id="type">
+                <select
+                  name="type"
+                  id="type"
+                  onChange={event =>
+                    setParams(prevState => ({
+                      ...prevState,
+                      type: event.target.value,
+                    }))
+                  }
+                  value={params.type}
+                >
                   <option value="">All</option>
                   <option value="video">Video</option>
                   <option value="channel">Channel</option>
@@ -101,9 +113,22 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
                 <span></span>
               </CustomSelect>
               <CustomSelect>
-                <select name="publishedAfter" id="publishedAfter">
-                  <option value="">Any time</option>
-                  <option value={new Date().toISOString()}>Today</option>
+                <select
+                  name="publishedAfter"
+                  id="publishedAfter"
+                  onChange={event =>
+                    setParams(prevState => ({
+                      ...prevState,
+                      publishedAfter:
+                        event.target.value === "null"
+                          ? null
+                          : event.target.value,
+                    }))
+                  }
+                  value={params.publishedAfter}
+                >
+                  <option value={subtractDays(365 * 3)}>Any time</option>
+                  <option value={subtractDays(1)}>Today</option>
                   <option value={subtractDays(7)}>This week</option>
                   <option value={subtractDays(30)}>This month</option>
                   <option value={subtractDays(365)}>This year</option>
@@ -118,12 +143,21 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
         <section>
           <CustomSelectWrapper>
             <CustomSelect>
-              <select name="type" id="type">
+              <select
+                name="type"
+                id="type"
+                onChange={event =>
+                  setParams(prevState => ({
+                    ...prevState,
+                    type: event.target.value,
+                  }))
+                }
+                value={params.type}
+              >
                 <option value="All">All</option>
                 <option value="Video">Video</option>
                 <option value="Channel">Channel</option>
                 <option value="Playlist">Playlist</option>
-                <option value="Movie">Movie</option>
               </select>
               <span></span>
             </CustomSelect>
