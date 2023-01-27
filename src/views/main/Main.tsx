@@ -1,5 +1,7 @@
 import { useReducer } from "react";
+import styled from "styled-components";
 import Header from "../../components/header";
+import VideoList from "../../components/videoList";
 
 const initialState = {
   loading: true,
@@ -114,10 +116,15 @@ const Main = () => {
   }
 
   return (
-    <>
+    <Wrapper>
       <Header />
-    </>
+      <VideoList />
+    </Wrapper>
   );
 };
+
+const Wrapper = styled.section`
+  height: 100%;
+`;
 
 export default Main;
