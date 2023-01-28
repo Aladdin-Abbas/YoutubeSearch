@@ -39,7 +39,7 @@ Remember to have **Node JS** installed on your computer . To run this project, y
 <a href="https://imgbb.com/"><img src="https://i.ibb.co/m576WYs/Folder-Structure.jpg" alt="Folder-Structure" border="0" /></a>
 
 ### components
-There is two type of components React Js components and styled components to differntiate the styled components is writting 
+There is two type of components React Js components and styled components to differentiate the styled components is writting 
 in the following way Name.style.ts and then imported as S.styledComponentName (S) which means Style
 
 ### hooks
