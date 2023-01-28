@@ -50,7 +50,7 @@ const initialState = {
 const Main = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [params, setParams] = useState({
-    maxResults: 10,
+    maxResults: 5,
     q: "",
     type: "",
     publishedAfter: null,
@@ -103,7 +103,7 @@ const Main = () => {
 
   return (
     <Wrapper>
-      <Header params={params} setParams={setParams} />
+      <Header setParams={setParams} />
       <VideoList
         state={state}
         dispatch={dispatch}

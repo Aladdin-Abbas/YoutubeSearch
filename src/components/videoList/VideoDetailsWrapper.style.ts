@@ -31,5 +31,10 @@ export const VideoDetailsWrapper = styled.section`
     p {
       display: none;
     }
+    h1,
+    p,
+    span {
+      font-size: 14px;
+    }
   }
 `;
