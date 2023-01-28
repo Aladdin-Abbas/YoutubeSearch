@@ -54,4 +54,7 @@ Contains the types
 ### API
 Contains the Custom axios instance defaults
 
+## Side Note
+Please keep in mind i'm using free api key and the limit is kinda low so if the limit was exceeded please replace VITE_API_KEY in the .env with a new api key
+you can optain a valid key using the following website https://console.cloud.google.com/apis/credentials?project=$YourProject
 
