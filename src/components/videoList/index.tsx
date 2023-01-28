@@ -5,6 +5,7 @@ import youtubeAPI from "../../apis/youtubeAPI";
 import { ApiResponse, initState } from "../../types/youtubeApiTypes";
 import { subtractDays } from "../../utils/utils";
 import ListItem from "./ListItem";
+import LoadingSpinner from "../LoadingSpinner";
 
 interface IProps {
   state: initState;
@@ -201,7 +202,7 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
       <section>
         <hr />
         {state?.error && <p>{state.error}</p>}
-        {state?.loading && <p>Loading...</p>}
+        {state?.loading && <LoadingSpinner />}
         {!state?.error &&
           !state?.loading &&
           state?.result?.items?.map((el, i) => {
