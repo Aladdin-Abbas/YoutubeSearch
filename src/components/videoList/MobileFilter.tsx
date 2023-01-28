@@ -39,7 +39,7 @@ const MobileFilter = ({ params, setParams }: IProps) => {
               }
               value={params.type}
             >
-              <option value="All">All</option>
+              <option value="">All</option>
               <option value="Video">Video</option>
               <option value="Channel">Channel</option>
               <option value="Playlist">Playlist</option>
