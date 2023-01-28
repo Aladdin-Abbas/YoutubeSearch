@@ -47,49 +47,6 @@ const initialState = {
   },
 };
 
-// interface initialState {
-//   loading: boolean;
-//   error: string;
-//   result: {
-//     kind: string;
-//     etag: string;
-//     nextPageToken: string;
-//     prevPageToken: string;
-//     regionCode: string;
-//     pageInfo: {
-//       totalResults: number;
-//       resultsPerPage: number;
-//     };
-//     items: videoList[];
-//   };
-// }
-
-// type videoList = {
-//   kind: string;
-//   etag: string;
-//   id: {
-//     kind: string;
-//     videoId: string;
-//     channelId: string;
-//     playlistId: string;
-//   };
-//   snippet: {
-//     publishedAt: Date;
-//     channelId: string;
-//     title: string;
-//     description: string;
-//     thumbnails: {
-//       ["key"]: {
-//         url: string;
-//         width: number;
-//         height: number;
-//       };
-//     };
-//     channelTitle: string;
-//     liveBroadcastContent: string;
-//   };
-// };
-
 const Main = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [params, setParams] = useState({
@@ -97,6 +54,7 @@ const Main = () => {
     q: "",
     type: "",
     publishedAfter: null,
+    pageToken: "",
   });
 
   function reducer(state: initState, action: { type: string; payload?: any }) {
@@ -114,6 +72,30 @@ const Main = () => {
           error: "Something went wrong!",
           result: {},
         };
+      }
+      case "Append_Data_On_Scroll": {
+        if (state?.result?.items[0]?.kind) {
+          return {
+            loading: false,
+            error: "",
+            result: {
+              ...state.result,
+              ...action.payload,
+              items: [
+                ...new Set([...state.result.items, ...action.payload.items]),
+              ],
+            },
+          };
+        } else {
+          return {
+            loading: false,
+            error: "",
+            result: action.payload,
+          };
+        }
+      }
+      case "Loading": {
+        return { ...state, loading: true, error: "" };
       }
     }
     throw Error("Unknown action: " + action.type);

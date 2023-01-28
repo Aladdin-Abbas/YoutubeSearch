@@ -10,6 +10,7 @@ interface IProps {
     q: string;
     type: string;
     publishedAfter: any;
+    pageToken: string;
   };
   setParams: React.Dispatch<
     React.SetStateAction<{
@@ -17,6 +18,7 @@ interface IProps {
       q: string;
       type: string;
       publishedAfter: any;
+      pageToken: string;
     }>
   >;
 }
@@ -27,7 +29,7 @@ const Header = ({ params, setParams }: IProps) => {
   const desktopInputRef = React.useRef<HTMLInputElement>(null);
 
   const onSearch = (val: string) => {
-    if (val) setParams(prevSate => ({ ...prevSate, q: val }));
+    setParams(prevSate => ({ ...prevSate, q: val, pageToken: "" }));
   };
 
   return (
