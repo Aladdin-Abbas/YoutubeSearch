@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import filterIcon from "../../assets/images/icons/filter.png";
 import youtubeAPI from "../../apis/youtubeAPI";
 import { ApiResponse, initState } from "../../types/youtubeApiTypes";
-import { getYearDiff, subtractDays } from "../../utils/utils";
+import { subtractDays } from "../../utils/utils";
+import ListItem from "./ListItem";
+
 interface IProps {
   state: initState;
   dispatch: React.Dispatch<{
@@ -15,6 +17,7 @@ interface IProps {
     q: string;
     type: string;
     publishedAfter: any;
+    pageToken: string;
   };
   setParams: React.Dispatch<
     React.SetStateAction<{
@@ -22,6 +25,7 @@ interface IProps {
       q: string;
       type: string;
       publishedAfter: any;
+      pageToken: string;
     }>
   >;
 }
@@ -29,40 +33,46 @@ interface IProps {
 const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
-  //   const refetchData = async () => {
-  //     try {
-  //       const response = await youtubeAPI.get(
-  //         "search?part=snippet&key=AIzaSyBMxc3zON1lj_BClfxjkOfQZISaBV-oVfU",
-  //         {
-  //           params: { maxResults: 10 },
-  //         }
-  //       );
-  //       const json = (await response.data) as ApiResponse;
-  //       console.log(json);
-  //       dispatch({ type: "Initial_Fetch_Success", payload: json });
-  //     } catch (error) {
-  //       console.error(error);
-  //       dispatch({ type: "Initial_Fetch_Error", payload: {} });
-  //       return;
-  //     }
-  //   };
+  const intObserver = useRef<IntersectionObserver | null>(null);
+  const lastVideoRef = useCallback(
+    (ListItem: any) => {
+      if (state.loading) return;
+
+      if (intObserver.current) intObserver.current.disconnect();
+
+      intObserver.current = new IntersectionObserver(videos => {
+        if (videos[0].isIntersecting && state?.result?.nextPageToken) {
+          console.log("We are near the last post!");
+          setParams(prevState => ({
+            ...prevState,
+            pageToken: state?.result?.nextPageToken,
+          }));
+          console.log(state?.result?.nextPageToken);
+        }
+      });
+
+      if (ListItem) intObserver.current.observe(ListItem);
+    },
+    [state.loading, state?.result?.nextPageToken]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
-
+    dispatch({ type: "Loading", payload: {} });
     const fetchData = async () => {
       try {
         const response = await youtubeAPI.get(
-          "search?part=snippet&key=AIzaSyC1DFeCeKrTeEEILgTtXfIzRoUi4zK2sG4",
+          "search?part=snippet&key=AIzaSyDaeWvgwauLl8pXxMXRJHo3k7BiPIBsXfM",
           {
-            // params: { maxResults: 10 },
             params,
             signal: controller.signal,
           }
         );
         const json = (await response.data) as ApiResponse;
         console.log(json);
-        dispatch({ type: "Initial_Fetch_Success", payload: json });
+        params.pageToken
+          ? dispatch({ type: "Append_Data_On_Scroll", payload: json })
+          : dispatch({ type: "Initial_Fetch_Success", payload: json });
       } catch (error) {
         console.error(error);
         dispatch({ type: "Initial_Fetch_Error", payload: {} });
@@ -71,7 +81,6 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
     };
 
     fetchData();
-
     return () => controller.abort();
   }, [params]);
 
@@ -101,6 +110,7 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
                     setParams(prevState => ({
                       ...prevState,
                       type: event.target.value,
+                      pageToken: "",
                     }))
                   }
                   value={params.type}
@@ -119,6 +129,7 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
                   onChange={event =>
                     setParams(prevState => ({
                       ...prevState,
+                      pageToken: "",
                       publishedAfter:
                         event.target.value === "null"
                           ? null
@@ -149,6 +160,7 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
                 onChange={event =>
                   setParams(prevState => ({
                     ...prevState,
+                    pageToken: "",
                     type: event.target.value,
                   }))
                 }
@@ -162,12 +174,24 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
               <span></span>
             </CustomSelect>
             <CustomSelect>
-              <select name="uploadDate" id="uploadDate">
-                <option value="AnyTime">Any time</option>
-                <option value="Today">Today</option>
-                <option value="ThisWeek">This week</option>
-                <option value="ThisMonth">This month</option>
-                <option value="ThisYear">This year</option>
+              <select
+                name="publishedAfter"
+                id="publishedAfter"
+                onChange={event =>
+                  setParams(prevState => ({
+                    ...prevState,
+                    pageToken: "",
+                    publishedAfter:
+                      event.target.value === "null" ? null : event.target.value,
+                  }))
+                }
+                value={params.publishedAfter}
+              >
+                <option value={subtractDays(365 * 3)}>Any time</option>
+                <option value={subtractDays(1)}>Today</option>
+                <option value={subtractDays(7)}>This week</option>
+                <option value={subtractDays(30)}>This month</option>
+                <option value={subtractDays(365)}>This year</option>
               </select>
               <span></span>
             </CustomSelect>
@@ -176,29 +200,17 @@ const VideoList = ({ state, dispatch, params, setParams }: IProps) => {
       </MobileFilter>
       <section>
         <hr />
-        {state &&
-          state?.result?.items?.length > 0 &&
-          state?.result?.items.map(el => (
-            <VideoDetailsWrapper key={el?.id?.videoId}>
-              <img
-                src={el?.snippet?.thumbnails?.medium?.url}
-                alt={el?.snippet?.title}
-              />
-              <section>
-                <h1>{el?.snippet?.title}</h1>
-                <section>
-                  <span>{el?.snippet?.channelTitle}</span>
-                  <span>
-                    {el?.snippet?.publishedAt
-                      ? getYearDiff(new Date(el?.snippet?.publishedAt)) +
-                        " years"
-                      : ""}
-                  </span>
-                </section>
-                <p>{el?.snippet?.description}</p>
-              </section>
-            </VideoDetailsWrapper>
-          ))}
+        {state?.error && <p>{state.error}</p>}
+        {state?.loading && <p>Loading...</p>}
+        {!state?.error &&
+          !state?.loading &&
+          state?.result?.items?.map((el, i) => {
+            const isLastItem = state?.result?.items.length === i + 1;
+            if (!isLastItem) {
+              return <ListItem key={el?.etag} el={el} />;
+            }
+            return <ListItem key={el?.etag} el={el} ref={lastVideoRef} />;
+          })}
       </section>
     </Wrapper>
   );
@@ -325,38 +337,4 @@ const CustomSelect = styled.section`
     }
   }
   position: relative;
-`;
-
-const VideoDetailsWrapper = styled.section`
-  display: flex;
-  margin-bottom: 20px;
-  align-items: flex-start;
-  gap: 12px;
-  img {
-    flex-basis: 40%;
-  }
-  section {
-    flex-basis: 60%;
-  }
-  h1 {
-    margin: 0;
-    font-size: 18px;
-  }
-  span {
-    margin-right: 12px;
-  }
-
-  @media (max-width: 600px) {
-    width: 320px;
-    margin: 0 auto 20px;
-    img {
-      max-width: 180px;
-    }
-    section {
-      max-width: 120px;
-    }
-    p {
-      display: none;
-    }
-  }
 `;
