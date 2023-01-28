@@ -24,6 +24,7 @@ export const TextWrapperStyle = styled.section`
     border-radius: 0px 4px 4px 0;
     border: 1px solid gray;
     border-left: 0px;
+    cursor: pointer;
     @media (max-width: 600px) {
       background-color: red;
       max-width: 100%;
